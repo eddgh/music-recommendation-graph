@@ -27,7 +27,6 @@ Este projeto utiliza **Neo4j** e **consultas Cypher** para recomendar músicas c
 | Músicas de artistas seguidos ainda não curtidas                           | Sugestões de faixas de artistas que o usuário já acompanha, mas que ainda não curtiu — revelando obras que passaram despercebidas e incentivando uma exploração mais profunda dos artistas favoritos.                        |
 | Músicas do mesmo gênero que o usuário costuma curtir                      | Faixas pertencentes aos gêneros que o usuário já demonstrou interesse, mas que ainda não foram curtidas. A ideia é ampliar o repertório dentro dos estilos que ele aprecia, revelando novas músicas alinhadas ao seu gosto. |
 | Músicas com perfil sonoro semelhante (dançabilidade, energia)            | Recomendações baseadas na média de atributos sonoros das músicas curtidas pelo usuário, como dançabilidade e energia. O sistema sugere faixas que mantêm o mesmo clima e vibração sonora que ele costuma apreciar.           |
-| Usuário gerando recomendações com base em artistas que ele gosta         | Funcionalidade que permite ao usuário criar recomendações personalizadas a partir dos artistas que ele já curte. Com isso, o sistema sugere músicas desses artistas que ainda não foram exploradas, formando uma playlist que o próprio usuário pode compartilhar com amigos — como uma curadoria musical feita por ele mesmo. |
 
 ## 📦 Como rodar
 
@@ -35,8 +34,9 @@ Este projeto utiliza **Neo4j** e **consultas Cypher** para recomendar músicas c
 2. Crie um banco e execute os scripts em `cypher/`
 3. Importe o CSV com `apoc.load.csv`
 4. Teste as consultas de recomendação
-5. Na pasta [data](/data/) você encontra os csv utilizados
-6. Na pasta [assets](/assets/) você encontra a imagem do Knowledge Graph, o arquivo do Dashboard para importar, uma cópia do projeto (backup) completo para importar em uma instância vazia do Neo4j e um arquivo de importação com as pastas de query (em csv) para importar na Query Saved Cypher Panel!
+5. Na pasta [data](/data/) você encontra os csv utilizados.
+6. Na pasta [assets](/assets/) você encontra a imagem do Knowledge Graph, a imagem do passo a passo que deve seguir se optar pela instalação simplificada explicada no passo 7, o arquivo do Dashboard para importar, uma cópia do projeto (backup) completo para importar em uma instância vazia do Neo4j e um arquivo de importação com as pastas de query (em csv) para importar na Query Saved Cypher Panel!
+7. Você também pode instalar de forma mais simplificada rodando cada um dos passos na sequência em que aparecem na pasta INSTALAÇÃO do arquivo neo4j_query_saved_cypher... que você pode importar na sua área de query saved do Browser do Neo4j.
 
 ## 🎥 Demonstração
 
