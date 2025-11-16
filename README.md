@@ -1,3 +1,11 @@
+<p align="center">
+    <img width="200" src="./assets/banner.png">
+</p>
+
+
+<p align="center">
+
+
 # music-recommendation-graph
 Projeto de Sistema de Recomendação Musical com Grafos usando Neo4j e Cypher!
 
@@ -35,12 +43,12 @@ Este projeto utiliza **Neo4j** e **consultas Cypher** para recomendar músicas c
 3. Importe o CSV com `apoc.load.csv`
 4. Teste as consultas de recomendação
 5. Na pasta [data](/data/) você encontra os csv utilizados.
-6. Na pasta [assets](/assets/) você encontra a imagem do Knowledge Graph, a imagem do passo a passo que deve seguir se optar pela instalação simplificada explicada no passo 7, o arquivo do Dashboard para importar, uma cópia do projeto (backup) completo para importar em uma instância vazia do Neo4j e um arquivo de importação com as pastas de query (em csv) para importar na Query Saved Cypher Panel!
-7. Você também pode instalar de forma mais simplificada rodando cada um dos passos na sequência em que aparecem na pasta INSTALAÇÃO do arquivo neo4j_query_saved_cypher... que você pode importar na sua área de query saved do Browser do Neo4j.
+6. Na pasta [assets](/assets/) você encontra a imagem do Knowledge Graph, a imagem do passo a passo que deve seguir se optar pela instalação simplificada explicada no passo 7, os arquivos do Dashboard para importar, uma cópia do projeto (backup) completo para importar em uma instância vazia do Neo4j e um arquivo de importação com as pastas de query (em csv) para importar na Query Saved Cypher Panel!
+7. Você também pode instalar de forma mais simplificada rodando cada um dos passos na sequência em que aparecem na pasta INSTALAÇÃO do arquivo neo4j_query_saved_cypher, que você pode importar na sua área de query saved do Browser do Neo4j.
 
 ## 🎥 Demonstração
 
-Veja o projeto funcionando: [link para vídeo](video/demo.mp4)
+Veja o projeto funcionando: [link para os vídeos](./video/Videos%20do%20projeto.url)
 
 ## 🛠️ Tecnologias
 

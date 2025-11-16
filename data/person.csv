@@ -1,11 +1,11 @@
-personId,name,email,age,gender,country,city,language,subscriber,signup_date,favorite_genres,search_history,listening_time,device
-1,Emily Johnson,emily.johnson@email.com,25,F,USA,New York,en,true,2023-03-15,"pop,r&b","taylor swift, drake","evening","mobile"
-2,Michael Smith,michael.smith@email.com,32,M,USA,Chicago,en,false,2022-11-02,"rock,alternative","foo fighters, nirvana","afternoon","desktop"
-3,Sophia Davis,sophia.davis@email.com,28,F,USA,Los Angeles,en,true,2021-07-20,"hip-hop,pop","kendrick lamar, dua lipa","morning","smart speaker"
-4,James Wilson,james.wilson@email.com,22,M,USA,Houston,en,false,2024-01-10,"trap,rap","travis scott, 21 savage","evening","mobile"
-5,Olivia Martinez,olivia.martinez@email.com,35,F,USA,San Diego,en,true,2020-09-05,"jazz,blues","miles davis, norah jones","afternoon","desktop"
-6,Ethan Brown,ethan.brown@email.com,30,M,USA,Miami,en,true,2023-06-18,"reggae,latin","bob marley, bad bunny","morning","mobile"
-7,Ava Taylor,ava.taylor@email.com,27,F,USA,Seattle,en,false,2022-02-28,"k-pop,pop","blackpink, bts","evening","mobile"
-8,William Anderson,william.anderson@email.com,40,M,USA,Boston,en,true,2019-12-12,"classical,new age","beethoven, yiruma","morning","smart speaker"
-9,Isabella Thomas,isabella.thomas@email.com,19,F,USA,Denver,en,false,2024-05-03,"edm,trap","marshmello, lil nas x","afternoon","mobile"
-10,Daniel Moore,daniel.moore@email.com,33,M,USA,San Francisco,en,true,2021-10-25,"electronic,house","calvin harris, zedd","evening","desktop"
+personId,name,email,age,gender,country,city,language,subscriber,signup_date,listening_time,device
+1,Emily Johnson,emily.johnson@email.com,25,F,USA,New York,en,TRUE,2023-03-15,evening,mobile
+2,Michael Smith,michael.smith@email.com,32,M,USA,Chicago,en,FALSE,2022-11-02,afternoon,desktop
+3,Sophia Davis,sophia.davis@email.com,28,F,USA,Los Angeles,en,TRUE,2021-07-20,morning,smart speaker
+4,James Wilson,james.wilson@email.com,22,M,USA,Houston,en,FALSE,2024-01-10,evening,mobile
+5,Olivia Martinez,olivia.martinez@email.com,35,F,USA,San Diego,en,TRUE,2020-09-05,afternoon,desktop
+6,Ethan Brown,ethan.brown@email.com,30,M,USA,Miami,en,TRUE,2023-06-18,morning,mobile
+7,Ava Taylor,ava.taylor@email.com,27,F,USA,Seattle,en,FALSE,2022-02-28,evening,mobile
+8,William Anderson,william.anderson@email.com,40,M,USA,Boston,en,TRUE,2019-12-12,morning,smart speaker
+9,Isabella Thomas,isabella.thomas@email.com,19,F,USA,Denver,en,FALSE,2024-05-03,afternoon,mobile
+10,Daniel Moore,daniel.moore@email.com,33,M,USA,San Francisco,en,TRUE,2021-10-25,evening,desktop

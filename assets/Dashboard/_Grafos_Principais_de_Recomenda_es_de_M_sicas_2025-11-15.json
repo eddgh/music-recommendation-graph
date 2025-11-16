@@ -1,0 +1,630 @@
+{
+  "version": 2,
+  "title": " 🎡 Grafos Principais de Recomendações de Músicas",
+  "description": "",
+  "pages": [
+    {
+      "version": 1,
+      "title": "Recomendação baseada em Gostos Semelhantes",
+      "widgets": [
+        {
+          "version": 1,
+          "title": "Usuário",
+          "w": 3,
+          "h": 1,
+          "x": 0,
+          "y": 0,
+          "meta": {},
+          "settings": {
+            "version": 1,
+            "type": "filter",
+            "databaseName": "neo4j",
+            "entityType": "node",
+            "entityLabel": "Person",
+            "entityPropertyKey": "name",
+            "parameterName": "usuario",
+            "enableTimeZone": false
+          }
+        },
+        {
+          "version": 1,
+          "title": "Usuários em teste",
+          "w": 2,
+          "h": 4,
+          "x": 10,
+          "y": 0,
+          "meta": {},
+          "settings": {
+            "version": 1,
+            "type": "text",
+            "markdown": "&nbsp;\n# &nbsp;👩‍🦰 \nOliva Martinez\n&nbsp;\n\n# &nbsp;👧 \nAva Taylor\n\n\n"
+          }
+        },
+        {
+          "version": 1,
+          "title": "Data Fim",
+          "w": 2,
+          "h": 1,
+          "x": 8,
+          "y": 0,
+          "meta": {},
+          "settings": {
+            "version": 1,
+            "type": "filter",
+            "databaseName": "neo4j",
+            "entityType": "node",
+            "entityLabel": "Rec",
+            "entityPropertyKey": "data",
+            "parameterName": "end_date",
+            "enableTimeZone": false
+          }
+        },
+        {
+          "version": 1,
+          "title": "Data Iníco",
+          "w": 2,
+          "h": 1,
+          "x": 6,
+          "y": 0,
+          "meta": {},
+          "settings": {
+            "version": 1,
+            "type": "filter",
+            "databaseName": "neo4j",
+            "entityType": "node",
+            "entityLabel": "Rec",
+            "entityPropertyKey": "data",
+            "parameterName": "start_date",
+            "enableTimeZone": false
+          }
+        },
+        {
+          "version": 1,
+          "title": "Explore as Abas",
+          "w": 10,
+          "h": 7,
+          "x": 0,
+          "y": 1,
+          "meta": {
+            "latestCypherQueries": [
+              {
+                "query": "MATCH (p:Person)\nWHERE ($usuario = \"👥 todos\" OR p.name = $usuario)\nMATCH (rec:Rec {tipo: \"baseado_em_gostos_semelhantes\"})\nMATCH (rec)-[r1:SUGGESTS]->(s:Song)\nMATCH (s)-[r2:INFLUENCED_BY]->(influencer:Person)\nMATCH (rec)<-[r3:RECOMMENDED_BY]-(algo:Algorithm {tipo: \"ShareTaste\"})\nMATCH (rec)-[r4:TARGETED_TO]->(p)\n\nWHERE\n  ($artist_name = \"👥 todos\" OR rec.influenciadoPor = $artist_name) AND\n  ($start_date = \"📅 todo o período\" OR rec.data >= date($start_date)) AND\n  ($end_date = \"📅 todo o período\" OR rec.data <= date($end_date))\n\n//RETURN algo, rec, p, s, a, r1, r2, r3, r4\nRETURN *",
+                "origin": "user"
+              },
+              {
+                "query": "MATCH (p:Person)\nWHERE ($usuario = \"👥 todos\" OR p.name = $usuario)\nMATCH (rec:Rec {tipo: \"baseado_em_gostos_semelhantes\"})\nMATCH (rec)-[r1:SUGGESTS]->(s:Song)\nMATCH (s)-[r2:INFLUENCED_BY]->(influencer:Person)\nMATCH (rec)<-[r3:RECOMMENDED_BY]-(algo:Algorithm {tipo: \"SharesTaste\"})\nMATCH (rec)-[r4:TARGETED_TO]->(p)\n\nWHERE\n  ($artist_name = \"👥 todos\" OR rec.influenciadoPor = $artist_name) AND\n  ($start_date = \"📅 todo o período\" OR rec.data >= date($start_date)) AND\n  ($end_date = \"📅 todo o período\" OR rec.data <= date($end_date))\n\n//RETURN algo, rec, p, s, a, r1, r2, r3, r4\nRETURN *",
+                "origin": "user"
+              },
+              {
+                "query": "MATCH (p:Person)\nWHERE ($usuario = \"👥 todos\" OR p.name = $usuario)\nMATCH (rec:Rec {tipo: \"baseado_em_gosto_semelhante\"})\nMATCH (rec)-[r1:SUGGESTS]->(s:Song)\nMATCH (s)-[r2:INFLUENCED_BY]->(influencer:Person)\nMATCH (rec)<-[r3:RECOMMENDED_BY]-(algo:Algorithm {tipo: \"SharesTaste\"})\nMATCH (rec)-[r4:TARGETED_TO]->(p)\n\nWHERE\n  ($artist_name = \"👥 todos\" OR rec.influenciadoPor = $artist_name) AND\n  ($start_date = \"📅 todo o período\" OR rec.data >= date($start_date)) AND\n  ($end_date = \"📅 todo o período\" OR rec.data <= date($end_date))\n\n//RETURN algo, rec, p, s, a, r1, r2, r3, r4\nRETURN *",
+                "origin": "user"
+              },
+              {
+                "query": "MATCH (p:Person)\nWHERE ($usuario = \"👥 todos\" OR p.name = $usuario)\nMATCH (rec:Rec {tipo: \"baseado_em_artista_seguido\"})\nMATCH (rec)-[r1:SUGGESTS]->(s:Song)\nMATCH (s)-[r2:INFLUENCED_BY]->(a:Artist)\nMATCH (rec)<-[r3:RECOMMENDED_BY]-(algo:Algorithm {tipo: \"LikeArtist\"})\nMATCH (rec)-[r4:TARGETED_TO]->(p)\n\nWHERE\n  ($artist_name = \"👥 todos\" OR rec.influenciadoPor = $artist_name) AND\n  ($start_date = \"📅 todo o período\" OR rec.data >= date($start_date)) AND\n  ($end_date = \"📅 todo o período\" OR rec.data <= date($end_date))\n\n//RETURN algo, rec, p, s, a, r1, r2, r3, r4\nRETURN *",
+                "origin": "user"
+              },
+              {
+                "query": "MATCH (p:Person)\nMATCH\n  (p)<-[r1:RECOMMENDED_TO]-\n  (song:Song)<-[r2:RECOMMENDED]-\n  (rec:Rec)<-[r3:MADE_A_REC]-\n  (influencer:InfluencerP)\nWHERE\n  ($influencer_param = \"👥 todos\" OR rec.influenciadoPor = $influencer_param) AND\n  ($start_date = \"📅 todo o período\" OR rec.data >= date($start_date)) AND\n  ($end_date = \"📅 todo o período\" OR rec.data <= date($end_date))\nRETURN p, influencer, song, rec, r1, r2, r3",
+                "origin": "user"
+              }
+            ]
+          },
+          "settings": {
+            "type": "graph",
+            "query": "MATCH (p:Person)\nWHERE ($usuario = \"👥 todos\" OR p.name = $usuario)\nMATCH (rec:Rec {tipo: \"baseado_em_gostos_semelhantes\"})\nMATCH (rec)-[r1:SUGGESTS]->(s:Song)\nMATCH (s)-[r2:INFLUENCED_BY]->(influencer:Person)\nMATCH (rec)<-[r3:RECOMMENDED_BY]-(algo:Algorithm {tipo: \"ShareTaste\"})\nMATCH (rec)-[r4:TARGETED_TO]->(p)\n\nWHERE\n  ($influencer_param = \"👥 todos\" OR rec.influenciadoPor = $influencer_param) AND\n  ($start_date = \"📅 todo o período\" OR rec.data >= date($start_date)) AND\n  ($end_date = \"📅 todo o período\" OR rec.data <= date($end_date))\n\n//RETURN algo, rec, p, s, a, r1, r2, r3, r4\nRETURN *",
+            "databaseName": "neo4j",
+            "version": 2,
+            "enableSidePanel": true,
+            "enableContextMenu": true,
+            "layout": {
+              "type": "hierarchical",
+              "options": {
+                "direction": "down"
+              }
+            },
+            "enableDownloadImage": true
+          }
+        },
+        {
+          "version": 1,
+          "title": "Influencers",
+          "w": 3,
+          "h": 1,
+          "x": 3,
+          "y": 0,
+          "meta": {},
+          "settings": {
+            "version": 1,
+            "type": "filter",
+            "databaseName": "neo4j",
+            "entityType": "node",
+            "entityLabel": "InfluencerP",
+            "entityPropertyKey": "name",
+            "parameterName": "influencer_param",
+            "enableTimeZone": false
+          }
+        }
+      ]
+    },
+    {
+      "version": 1,
+      "title": "Recomendação baseada em Artistas Seguidos",
+      "widgets": [
+        {
+          "version": 1,
+          "title": "Usuários em teste",
+          "w": 2,
+          "h": 4,
+          "x": 10,
+          "y": 0,
+          "meta": {
+            "latestCypherQueries": [
+              {
+                "query": "&nbsp;\n# &nbsp;👩‍🦰\nOliva Martinez\n&nbsp;\n\n# &nbsp;👧\nAva Taylor",
+                "origin": "user"
+              }
+            ]
+          },
+          "settings": {
+            "version": 1,
+            "type": "text",
+            "markdown": "&nbsp;\n# &nbsp;👩‍🦰 \nOliva Martinez\n&nbsp;\n\n# &nbsp;👧 \nAva Taylor\n"
+          }
+        },
+        {
+          "version": 1,
+          "title": "Usuário",
+          "w": 3,
+          "h": 1,
+          "x": 0,
+          "y": 0,
+          "meta": {},
+          "settings": {
+            "version": 1,
+            "type": "filter",
+            "databaseName": "neo4j",
+            "entityType": "node",
+            "entityLabel": "Person",
+            "entityPropertyKey": "name",
+            "parameterName": "usuario",
+            "enableTimeZone": false
+          }
+        },
+        {
+          "version": 1,
+          "title": "Data Fim",
+          "w": 2,
+          "h": 1,
+          "x": 8,
+          "y": 0,
+          "meta": {},
+          "settings": {
+            "version": 1,
+            "type": "filter",
+            "databaseName": "neo4j",
+            "entityType": "node",
+            "entityLabel": "Rec",
+            "entityPropertyKey": "data",
+            "parameterName": "end_date",
+            "enableTimeZone": false
+          }
+        },
+        {
+          "version": 1,
+          "title": "Data Iníco",
+          "w": 2,
+          "h": 1,
+          "x": 6,
+          "y": 0,
+          "meta": {},
+          "settings": {
+            "version": 1,
+            "type": "filter",
+            "databaseName": "neo4j",
+            "entityType": "node",
+            "entityLabel": "Rec",
+            "entityPropertyKey": "data",
+            "parameterName": "start_date",
+            "enableTimeZone": false
+          }
+        },
+        {
+          "version": 1,
+          "title": "",
+          "w": 10,
+          "h": 7,
+          "x": 0,
+          "y": 1,
+          "meta": {
+            "latestCypherQueries": [
+              {
+                "query": "// MATCH (p:Person {name: $usuario})\n// MATCH (rec:Rec {tipo: \"baseado_em_artista_seguido\", recomendadoPara: $usuario})\n\nMATCH (p:Person)\nWHERE ($usuario = \"👥 todos\" OR p.name = $usuario)\nMATCH (rec:Rec {tipo: \"baseado_em_artista_seguido\"})\nMATCH (rec)-[r1:SUGGESTS]->(s:Song)\nMATCH (s)-[r2:INFLUENCED_BY]->(a:Artist)\nMATCH (rec)<-[r3:RECOMMENDED_BY]-(algo:Algorithm {tipo: \"LikeArtist\"})\nMATCH (rec)-[r4:TARGETED_TO]->(p)\n\nWHERE\n  ($artist_name = \"👥 todos\" OR rec.influenciadoPor = $artist_name) AND\n  ($start_date = \"📅 todo o período\" OR rec.data >= date($start_date)) AND\n  ($end_date = \"📅 todo o período\" OR rec.data <= date($end_date))\n\n//RETURN algo, rec, p, s, a, r1, r2, r3, r4\nRETURN *",
+                "origin": "user"
+              },
+              {
+                "query": "// MATCH (p:Person {name: $usuario})\n// MATCH (rec:Rec {tipo: \"baseado_em_artista_seguido\", recomendadoPara: $usuario})\n\nMATCH (p:Person)\nWHERE ($usuario = \"👥 todos\" OR p.name = $usuario)\nMATCH (rec:Rec {tipo: \"baseado_em_artista_seguido\"})\nMATCH (rec)-[r1:SUGGESTS]->(s:Song)\nMATCH (s)-[r2:INFLUENCED_BY]->(a:Artist)\nMATCH (rec)<-[r3:RECOMMENDED_BY]-(algo:Algorithm {tipo: \"LikeArtist\"})\nMATCH (rec)-[r4:TARGETED_TO]->(p)\n\nWHERE\n  ($artist_name = \"👥 todos\" OR TRUE) AND\n  // ($artist_name = \"👥 todos\" OR rec.influenciadoPor = $artist_name) AND\n  ($start_date = \"📅 todo o período\" OR rec.data >= date($start_date)) AND\n  ($end_date = \"📅 todo o período\" OR rec.data <= date($end_date))\n\n//RETURN algo, rec, p, s, a, r1, r2, r3, r4\nRETURN *",
+                "origin": "user"
+              },
+              {
+                "query": "// MATCH (p:Person {name: $usuario})\n// MATCH (rec:Rec {tipo: \"baseado_em_artista_seguido\", recomendadoPara: $usuario})\n\nMATCH (p:Person)\nWHERE ($usuario = \"👥 todos\" OR p.name = $usuario)\nMATCH (rec:Rec {tipo: \"baseado_em_artista_seguido\"})\nMATCH (rec)-[r1:SUGGESTS]->(s:Song)\nMATCH (s)-[r2:INFLUENCED_BY]->(a:Artist)\nMATCH (rec)<-[r3:RECOMMENDED_BY]-(algo:Algorithm {tipo: \"LikeArtist\"})\nMATCH (rec)-[r4:TARGETED_TO]->(p)\n\nWHERE\n  ($artist_name = \"👥 todos\" OR FALSE) AND\n  // ($artist_name = \"👥 todos\" OR rec.influenciadoPor = $artist_name) AND\n  ($start_date = \"📅 todo o período\" OR rec.data >= date($start_date)) AND\n  ($end_date = \"📅 todo o período\" OR rec.data <= date($end_date))\n\n//RETURN algo, rec, p, s, a, r1, r2, r3, r4\nRETURN *",
+                "origin": "user"
+              },
+              {
+                "query": "// MATCH (p:Person {name: $usuario})\n// MATCH (rec:Rec {tipo: \"baseado_em_artista_seguido\", recomendadoPara: $usuario})\n\nMATCH (p:Person)\nWHERE ($usuario = \"👥 todos\" OR p.name = $usuario)\nMATCH (rec:Rec {tipo: \"baseado_em_artista_seguido\"})\nMATCH (rec)-[r1:SUGGESTS]->(s:Song)\nMATCH (s)-[r2:INFLUENCED_BY]->(a:Artist)\nMATCH (rec)<-[r3:RECOMMENDED_BY]-(algo:Algorithm {tipo: \"LikeArtist\"})\nMATCH (rec)-[r4:TARGETED_TO]->(p)\n\nWHERE\n  ($artist_name = \"👥 todos\" OR $artist_name) AND\n  // ($artist_name = \"👥 todos\" OR rec.influenciadoPor = $artist_name) AND\n  ($start_date = \"📅 todo o período\" OR rec.data >= date($start_date)) AND\n  ($end_date = \"📅 todo o período\" OR rec.data <= date($end_date))\n\n//RETURN algo, rec, p, s, a, r1, r2, r3, r4\nRETURN *",
+                "origin": "user"
+              },
+              {
+                "query": "// MATCH (p:Person {name: $usuario})\n// MATCH (rec:Rec {tipo: \"baseado_em_artista_seguido\", recomendadoPara: $usuario})\n\nMATCH (p:Person)\nWHERE ($usuario = \"👥 todos\" OR p.name = $usuario)\nMATCH (rec:Rec {tipo: \"baseado_em_artista_seguido\"})\nMATCH (rec)-[r1:SUGGESTS]->(s:Song)\nMATCH (s)-[r2:INFLUENCED_BY]->(a:Artist)\nMATCH (rec)<-[r3:RECOMMENDED_BY]-(algo:Algorithm {tipo: \"LikeArtist\"})\nMATCH (rec)-[r4:TARGETED_TO]->(p)\n\nWHERE\n  ($artist_name = \"👥 todos\" OR \"Nirvana\") AND\n  // ($artist_name = \"👥 todos\" OR rec.influenciadoPor = $artist_name) AND\n  ($start_date = \"📅 todo o período\" OR rec.data >= date($start_date)) AND\n  ($end_date = \"📅 todo o período\" OR rec.data <= date($end_date))\n\n//RETURN algo, rec, p, s, a, r1, r2, r3, r4\nRETURN *",
+                "origin": "user"
+              }
+            ]
+          },
+          "settings": {
+            "type": "graph",
+            "query": "MATCH (p:Person)\nWHERE ($usuario = \"👥 todos\" OR p.name = $usuario)\nMATCH (rec:Rec {tipo: \"baseado_em_artista_seguido\"})\nMATCH (rec)-[r1:SUGGESTS]->(s:Song)\nMATCH (s)-[r2:INFLUENCED_BY]->(a:Artist)\nMATCH (rec)<-[r3:RECOMMENDED_BY]-(algo:Algorithm {tipo: \"LikeArtist\"})\nMATCH (rec)-[r4:TARGETED_TO]->(p)\n\nWHERE\n  ($artist_name = \"👥 todos\" OR rec.influenciadoPor = $artist_name) AND\n  ($start_date = \"📅 todo o período\" OR rec.data >= date($start_date)) AND\n  ($end_date = \"📅 todo o período\" OR rec.data <= date($end_date))\n\n//RETURN algo, rec, p, s, a, r1, r2, r3, r4\nRETURN *",
+            "databaseName": "neo4j",
+            "version": 2,
+            "enableSidePanel": true,
+            "enableContextMenu": true,
+            "layout": {
+              "type": "hierarchical",
+              "options": {
+                "direction": "down"
+              }
+            },
+            "enableDownloadImage": true
+          }
+        },
+        {
+          "version": 1,
+          "title": "Artistas seguido",
+          "w": 3,
+          "h": 1,
+          "x": 3,
+          "y": 0,
+          "meta": {},
+          "settings": {
+            "version": 1,
+            "type": "filter",
+            "databaseName": "neo4j",
+            "entityType": "node",
+            "entityLabel": "InfluencerA",
+            "entityPropertyKey": "name",
+            "parameterName": "artist_name",
+            "enableTimeZone": false
+          }
+        }
+      ]
+    },
+    {
+      "version": 1,
+      "title": "Recomendação baseada em Gênero Curtido",
+      "widgets": [
+        {
+          "version": 1,
+          "title": "Gêneros",
+          "w": 3,
+          "h": 1,
+          "x": 3,
+          "y": 0,
+          "meta": {},
+          "settings": {
+            "version": 1,
+            "type": "filter",
+            "databaseName": "neo4j",
+            "entityType": "node",
+            "entityLabel": "InfluencerG",
+            "entityPropertyKey": "name",
+            "parameterName": "genero",
+            "enableTimeZone": false
+          }
+        },
+        {
+          "version": 1,
+          "title": "Data Fim",
+          "w": 2,
+          "h": 1,
+          "x": 8,
+          "y": 0,
+          "meta": {},
+          "settings": {
+            "version": 1,
+            "type": "filter",
+            "databaseName": "neo4j",
+            "entityType": "node",
+            "entityLabel": "Rec",
+            "entityPropertyKey": "data",
+            "parameterName": "end_date",
+            "enableTimeZone": false
+          }
+        },
+        {
+          "version": 1,
+          "title": "Usuário",
+          "w": 3,
+          "h": 1,
+          "x": 0,
+          "y": 0,
+          "meta": {},
+          "settings": {
+            "version": 1,
+            "type": "filter",
+            "databaseName": "neo4j",
+            "entityType": "node",
+            "entityLabel": "Person",
+            "entityPropertyKey": "name",
+            "parameterName": "usuario",
+            "enableTimeZone": false
+          }
+        },
+        {
+          "version": 1,
+          "title": "Usuários em teste",
+          "w": 2,
+          "h": 4,
+          "x": 10,
+          "y": 0,
+          "meta": {},
+          "settings": {
+            "version": 1,
+            "type": "text",
+            "markdown": "&nbsp;\n# &nbsp;👩‍🦰 \nOliva Martinez\n&nbsp;\n\n# &nbsp;👧 \nAva Taylor\n"
+          }
+        },
+        {
+          "version": 1,
+          "title": "Data Iníco",
+          "w": 2,
+          "h": 1,
+          "x": 6,
+          "y": 0,
+          "meta": {},
+          "settings": {
+            "version": 1,
+            "type": "filter",
+            "databaseName": "neo4j",
+            "entityType": "node",
+            "entityLabel": "Rec",
+            "entityPropertyKey": "data",
+            "parameterName": "start_date",
+            "enableTimeZone": false
+          }
+        },
+        {
+          "version": 1,
+          "title": "",
+          "w": 10,
+          "h": 7,
+          "x": 0,
+          "y": 1,
+          "meta": {
+            "latestCypherQueries": [
+              {
+                "query": "MATCH (p:Person)\nWHERE ($usuario = \"👥 todos\" OR p.name = $usuario)\nMATCH (rec:Rec {tipo: \"baseado_em_generos_curtidos\"})\nMATCH (rec)-[r1:SUGGESTS]->(s:Song)\nMATCH (s)-[r2:INFLUENCED_BY]->(a:Genre)\nMATCH (rec)<-[r3:RECOMMENDED_BY]-(algo:Algorithm {tipo: \"LikedGenre\"})\nMATCH (rec)-[r4:TARGETED_TO]->(p)\n\nWHERE\n  ($genero = \"👥 todos\" OR rec.influenciadoPor = $genero) AND\n  ($start_date = \"📅 todo o período\" OR rec.data >= date($start_date)) AND\n  ($end_date = \"📅 todo o período\" OR rec.data <= date($end_date))\n\n//RETURN algo, rec, p, s, a, r1, r2, r3, r4\nRETURN *",
+                "origin": "user"
+              },
+              {
+                "query": "MATCH (p:Person)\nWHERE ($usuario = \"👥 todos\" OR p.name = $usuario)\nMATCH (rec:Rec {tipo: \"baseado_em_generos_curtidos\"})\nMATCH (rec)-[r1:SUGGESTS]->(s:Song)\nMATCH (s)-[r2:INFLUENCED_BY]->(a:Genre)\nMATCH (rec)<-[r3:RECOMMENDED_BY]-(algo:Algorithm {tipo: \"LikedGenre\"})\nMATCH (rec)-[r4:TARGETED_TO]->(p)\n\nWHERE\n  ($artist_name = \"👥 todos\" OR rec.influenciadoPor = $artist_name) AND\n  ($start_date = \"📅 todo o período\" OR rec.data >= date($start_date)) AND\n  ($end_date = \"📅 todo o período\" OR rec.data <= date($end_date))\n\n//RETURN algo, rec, p, s, a, r1, r2, r3, r4\nRETURN *",
+                "origin": "user"
+              },
+              {
+                "query": "MATCH (p:Person)\nWHERE ($usuario = \"👥 todos\" OR p.name = $usuario)\nMATCH (rec:Rec {tipo: \"baseado_em_generos_curtidos\"})\nMATCH (rec)-[r1:SUGGESTS]->(s:Song)\nMATCH (s)-[r2:INFLUENCED_BY]->(a:Artist)\nMATCH (rec)<-[r3:RECOMMENDED_BY]-(algo:Algorithm {tipo: \"LikedGenre\"})\nMATCH (rec)-[r4:TARGETED_TO]->(p)\n\nWHERE\n  ($artist_name = \"👥 todos\" OR rec.influenciadoPor = $artist_name) AND\n  ($start_date = \"📅 todo o período\" OR rec.data >= date($start_date)) AND\n  ($end_date = \"📅 todo o período\" OR rec.data <= date($end_date))\n\n//RETURN algo, rec, p, s, a, r1, r2, r3, r4\nRETURN *",
+                "origin": "user"
+              },
+              {
+                "query": "MATCH (p:Person)\nWHERE ($usuario = \"👥 todos\" OR p.name = $usuario)\nMATCH (rec:Rec {tipo: \"baseado_em_generos_curtidos\"})\nMATCH (rec)-[r1:SUGGESTS]->(s:Song)\nMATCH (s)-[r2:INFLUENCED_BY]->(a:Artist)\nMATCH (rec)<-[r3:RECOMMENDED_BY]-(algo:Algorithm {tipo: \"LikeArtist\"})\nMATCH (rec)-[r4:TARGETED_TO]->(p)\n\nWHERE\n  ($artist_name = \"👥 todos\" OR rec.influenciadoPor = $artist_name) AND\n  ($start_date = \"📅 todo o período\" OR rec.data >= date($start_date)) AND\n  ($end_date = \"📅 todo o período\" OR rec.data <= date($end_date))\n\n//RETURN algo, rec, p, s, a, r1, r2, r3, r4\nRETURN *",
+                "origin": "user"
+              },
+              {
+                "query": "MATCH (p:Person)\nWHERE ($usuario = \"👥 todos\" OR p.name = $usuario)\nMATCH (rec:Rec {tipo: \"baseado_em_artista_seguido\"})\nMATCH (rec)-[r1:SUGGESTS]->(s:Song)\nMATCH (s)-[r2:INFLUENCED_BY]->(a:Artist)\nMATCH (rec)<-[r3:RECOMMENDED_BY]-(algo:Algorithm {tipo: \"LikeArtist\"})\nMATCH (rec)-[r4:TARGETED_TO]->(p)\n\nWHERE\n  ($artist_name = \"👥 todos\" OR rec.influenciadoPor = $artist_name) AND\n  ($start_date = \"📅 todo o período\" OR rec.data >= date($start_date)) AND\n  ($end_date = \"📅 todo o período\" OR rec.data <= date($end_date))\n\n//RETURN algo, rec, p, s, a, r1, r2, r3, r4\nRETURN *",
+                "origin": "user"
+              }
+            ]
+          },
+          "settings": {
+            "type": "graph",
+            "query": "MATCH (p:Person)\nWHERE ($usuario = \"👥 todos\" OR p.name = $usuario)\nMATCH (rec:Rec {tipo: \"baseado_em_generos_curtidos\"})\nMATCH (rec)-[r1:SUGGESTS]->(s:Song)\nMATCH (s)-[r2:INFLUENCED_BY]->(a:Genre)\nMATCH (rec)<-[r3:RECOMMENDED_BY]-(algo:Algorithm {tipo: \"LikedGenre\"})\nMATCH (rec)-[r4:TARGETED_TO]->(p)\n\nWHERE\n  ($genero = \"👥 todos\" OR rec.influenciadoPor = $genero) AND\n  ($start_date = \"📅 todo o período\" OR rec.data >= date($start_date)) AND\n  ($end_date = \"📅 todo o período\" OR rec.data <= date($end_date))\n\n//RETURN algo, rec, p, s, a, r1, r2, r3, r4\nRETURN *",
+            "databaseName": "neo4j",
+            "version": 2,
+            "enableSidePanel": true,
+            "enableContextMenu": true,
+            "layout": {
+              "type": "hierarchical",
+              "options": {
+                "direction": "down"
+              }
+            },
+            "enableDownloadImage": true
+          }
+        }
+      ]
+    },
+    {
+      "version": 1,
+      "title": "Recomendação baseada no Mesmo Perfil Sonoro",
+      "widgets": [
+        {
+          "version": 1,
+          "title": "Níveis de Compat.",
+          "w": 2,
+          "h": 8,
+          "x": 10,
+          "y": 0,
+          "meta": {},
+          "settings": {
+            "version": 1,
+            "type": "text",
+            "markdown": "#### ⛓️‍💥Compatibilidade da Música Recomendada\n---\nQuanto mais próximo de zero mais compatível com o gosto do usuário a música é.\n&nbsp;\n&nbsp;\n&nbsp;\n\n| Faixa|Nível|\n|:--:|:--:|\n| 0.00 ___ 0.10| Muito Alta|\n| 0.10 ___ 0.25| Alta|\n| 0.25 ___ 0.40| Média|\n| 0.40 ___ 0.60| Baixa|\n| 0.60 ___ 1.00| Muito Baixa|\n\nNó vermelho com as descrições de níveis: **Muito Alta, Alta, Média, Baixa ou Muito Baixa**\n\n&nbsp;\n\n**Usuários em teste:** \n# &nbsp;👩‍🦰 \nOliva Martinez\n&nbsp;\n\n# &nbsp;👧 \nAva Taylor\n"
+          }
+        },
+        {
+          "version": 1,
+          "title": "Data Iníco",
+          "w": 2,
+          "h": 1,
+          "x": 6,
+          "y": 0,
+          "meta": {},
+          "settings": {
+            "version": 1,
+            "type": "filter",
+            "databaseName": "neo4j",
+            "entityType": "node",
+            "entityLabel": "Rec",
+            "entityPropertyKey": "data",
+            "parameterName": "start_date",
+            "enableTimeZone": false
+          }
+        },
+        {
+          "version": 1,
+          "title": "",
+          "w": 10,
+          "h": 7,
+          "x": 0,
+          "y": 1,
+          "meta": {
+            "latestCypherQueries": [
+              {
+                "query": "MATCH (p:Person)\nWHERE ($usuario = \"👥 todos\" OR p.name = $usuario)\nMATCH (rec:Rec {tipo: \"baseado_em_perfil_sonoro\"})\nMATCH (rec)-[r1:SUGGESTS]->(s:Song)\nMATCH (s)-[r2:INFLUENCED_BY]->(comp:Compatibility)\nMATCH (rec)<-[r3:RECOMMENDED_BY]-(algo:Algorithm {tipo: \"SoundProfile\"})\nMATCH (rec)-[r4:TARGETED_TO]->(p)\nMATCH (s)-[r5:BY_ARTIST]->(a:Artist)\nMATCH (s)-[r6:HAS_GENRE]->(g:Genre)\n\nWHERE\n  ($compatibilidade = \"👥 todos\" OR comp.nivel = $compatibilidade) AND\n  ($start_date = \"📅 todo o período\" OR rec.data >= date($start_date)) AND\n  ($end_date = \"📅 todo o período\" OR rec.data <= date($end_date))\n\n// WITH p, rec, s, comp, algo, a, g,\nRETURN *",
+                "origin": "user"
+              },
+              {
+                "query": "MATCH (p:Person)\nWHERE ($usuario = \"👥 todos\" OR p.name = $usuario)\nMATCH (rec:Rec {tipo: \"baseado_em_perfil_sonoro\"})\nMATCH (rec)-[r1:SUGGESTS]->(s:Song)\nMATCH (s)-[r2:INFLUENCED_BY]->(comp:Compatibility)\nMATCH (rec)<-[r3:RECOMMENDED_BY]-(algo:Algorithm {tipo: \"SoundProfile\"})\nMATCH (rec)-[r4:TARGETED_TO]->(p)\nMATCH (s)-[r1:BY_ARTIST]->(a:Artist)\nMATCH (s)-[r2:HAS_GENRE]->(g:Genre)\n\nWHERE\n  ($compatibilidade = \"👥 todos\" OR comp.nivel = $compatibilidade) AND\n  ($start_date = \"📅 todo o período\" OR rec.data >= date($start_date)) AND\n  ($end_date = \"📅 todo o período\" OR rec.data <= date($end_date))\n\nWITH p, rec, s, comp, algo, a, g\nRETURN *",
+                "origin": "user"
+              },
+              {
+                "query": "MATCH (p:Person)\nWHERE ($usuario = \"👥 todos\" OR p.name = $usuario)\nMATCH (rec:Rec {tipo: \"baseado_em_perfil_sonoro\"})\nMATCH (rec)-[r1:SUGGESTS]->(s:Song)\nMATCH (s)-[r2:INFLUENCED_BY]->(comp:Compatibility)\nMATCH (rec)<-[r3:RECOMMENDED_BY]-(algo:Algorithm {tipo: \"SoundProfile\"})\nMATCH (rec)-[r4:TARGETED_TO]->(p)\nMATCH (s)-[r1:BY_ARTIST]->(a:Artist)\nMATCH (s)-[r2:HAS_GENRE]->(g:Genre)\n\nWHERE\n  ($compatibilidade = \"👥 todos\" OR comp.nivel = $compatibilidade) AND\n  ($start_date = \"📅 todo o período\" OR rec.data >= date($start_date)) AND\n  ($end_date = \"📅 todo o período\" OR rec.data <= date($end_date))\n\nWITH p, rec, s, comp, algo, a, g,\nRETURN *",
+                "origin": "user"
+              },
+              {
+                "query": "MATCH (p:Person)\nWHERE ($usuario = \"👥 todos\" OR p.name = $usuario)\nMATCH (rec:Rec {tipo: \"baseado_em_perfil_sonoro\"})\nMATCH (rec)-[r1:SUGGESTS]->(s:Song)\nMATCH (s)-[r2:INFLUENCED_BY]->(comp:Compatibility)\nMATCH (rec)<-[r3:RECOMMENDED_BY]-(algo:Algorithm {tipo: \"SoundProfile\"})\nMATCH (rec)-[r4:TARGETED_TO]->(p)\nMATCH (s)-[r1:BY_ARTIST]->(a:Artist)\nMATCH (s)-[r2:HAS_GENRE]->(g:Genre)\n\nWHERE\n  ($compatibilidade = \"👥 todos\" OR comp.nivel = $compatibilidade) AND\n  ($start_date = \"📅 todo o período\" OR rec.data >= date($start_date)) AND\n  ($end_date = \"📅 todo o período\" OR rec.data <= date($end_date))\n\nWITH *\nRETURN *",
+                "origin": "user"
+              },
+              {
+                "query": "MATCH (p:Person)\nWHERE ($usuario = \"👥 todos\" OR p.name = $usuario)\nMATCH (rec:Rec {tipo: \"baseado_em_perfil_sonoro\"})\nMATCH (rec)-[r1:SUGGESTS]->(s:Song)\nMATCH (s)-[r2:INFLUENCED_BY]->(comp:Compatibility)\nMATCH (rec)<-[r3:RECOMMENDED_BY]-(algo:Algorithm {tipo: \"SoundProfile\"})\nMATCH (rec)-[r4:TARGETED_TO]->(p)\nMATCH (s)-[r1:BY_ARTIST]->(a:Artist)\nMATCH (s)-[r2:HAS_GENRE]->(g:Genre)\n\nWHERE\n  ($compatibilidade = \"👥 todos\" OR comp.nivel = $compatibilidade) AND\n  ($start_date = \"📅 todo o período\" OR rec.data >= date($start_date)) AND\n  ($end_date = \"📅 todo o período\" OR rec.data <= date($end_date))\n\nRETURN *",
+                "origin": "user"
+              }
+            ]
+          },
+          "settings": {
+            "type": "graph",
+            "query": "MATCH (p:Person)\nWHERE ($usuario = \"👥 todos\" OR p.name = $usuario)\nMATCH (rec:Rec {tipo: \"baseado_em_perfil_sonoro\"})\nMATCH (rec)-[r1:SUGGESTS]->(s:Song)\nMATCH (s)-[r2:INFLUENCED_BY]->(comp:Compatibility)\nMATCH (rec)<-[r3:RECOMMENDED_BY]-(algo:Algorithm {tipo: \"SoundProfile\"})\nMATCH (rec)-[r4:TARGETED_TO]->(p)\nMATCH (s)-[r5:BY_ARTIST]->(a:Artist)\nMATCH (s)-[r6:HAS_GENRE]->(g:Genre)\n\nWHERE\n  ($compatibilidade = \"👥 todos\" OR comp.nivel = $compatibilidade) AND\n  ($start_date = \"📅 todo o período\" OR rec.data >= date($start_date)) AND\n  ($end_date = \"📅 todo o período\" OR rec.data <= date($end_date))\n\n// WITH p, rec, s, comp, algo, a, g, \nRETURN *",
+            "databaseName": "neo4j",
+            "version": 2,
+            "enableSidePanel": true,
+            "enableContextMenu": true,
+            "layout": {
+              "type": "hierarchical",
+              "options": {
+                "direction": "down"
+              }
+            },
+            "enableDownloadImage": true
+          }
+        },
+        {
+          "version": 1,
+          "title": "Usuário",
+          "w": 3,
+          "h": 1,
+          "x": 0,
+          "y": 0,
+          "meta": {},
+          "settings": {
+            "version": 1,
+            "type": "filter",
+            "databaseName": "neo4j",
+            "entityType": "node",
+            "entityLabel": "Person",
+            "entityPropertyKey": "name",
+            "parameterName": "usuario",
+            "enableTimeZone": false
+          }
+        },
+        {
+          "version": 1,
+          "title": "Data Fim",
+          "w": 2,
+          "h": 1,
+          "x": 8,
+          "y": 0,
+          "meta": {},
+          "settings": {
+            "version": 1,
+            "type": "filter",
+            "databaseName": "neo4j",
+            "entityType": "node",
+            "entityLabel": "Rec",
+            "entityPropertyKey": "data",
+            "parameterName": "end_date",
+            "enableTimeZone": false
+          }
+        },
+        {
+          "version": 1,
+          "title": "⛓️‍💥Compatibilidade",
+          "w": 3,
+          "h": 1,
+          "x": 3,
+          "y": 0,
+          "meta": {},
+          "settings": {
+            "version": 1,
+            "type": "filter",
+            "databaseName": "neo4j",
+            "entityType": "node",
+            "entityLabel": "Compatibility",
+            "entityPropertyKey": "nivel",
+            "parameterName": "compatibilidade",
+            "enableTimeZone": false
+          }
+        }
+      ]
+    }
+  ],
+  "params": [
+    {
+      "version": 1,
+      "key": "start_date",
+      "type": "string",
+      "initialValue": "📅 todo o período"
+    },
+    {
+      "version": 1,
+      "key": "usuario",
+      "type": "string",
+      "initialValue": "👥 todos"
+    },
+    {
+      "version": 1,
+      "key": "artist_name",
+      "type": "string",
+      "initialValue": "👥 todos"
+    },
+    {
+      "version": 1,
+      "key": "genero",
+      "type": "string",
+      "initialValue": "👥 todos"
+    },
+    {
+      "version": 1,
+      "key": "influencer_param",
+      "type": "string",
+      "initialValue": "👥 todos"
+    },
+    {
+      "version": 1,
+      "key": "end_date",
+      "type": "string",
+      "initialValue": "📅 todo o período"
+    },
+    {
+      "version": 1,
+      "key": "compatibilidade",
+      "type": "string",
+      "initialValue": "👥 todos"
+    }
+  ]
+}

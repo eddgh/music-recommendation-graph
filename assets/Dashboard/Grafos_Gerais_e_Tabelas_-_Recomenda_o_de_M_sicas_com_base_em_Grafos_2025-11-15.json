@@ -1,0 +1,368 @@
+{
+  "version": 2,
+  "title": "Grafos Gerais e Tabelas - Recomendação de Músicas com base em Grafos",
+  "description": "",
+  "pages": [
+    {
+      "version": 1,
+      "title": "🎡Grafos & Insights",
+      "widgets": [
+        {
+          "version": 1,
+          "title": "Média de Dançabilidade por Gênero",
+          "w": 4,
+          "h": 4,
+          "x": 8,
+          "y": 4,
+          "meta": {
+            "latestCypherQueries": [
+              {
+                "query": "MATCH (s:Song)-[r:HAS_GENRE]-(g:Genre)\n\nRETURN g.name AS Gênero, round(100 * avg(s.danceability)) / 100 AS Media,\n       CASE\n         WHEN s.danceability < 0.25 THEN 'Baixa'\n         WHEN s.danceability >= 0.25 AND s.danceability < 0.5 THEN 'Média-baixa'\n         WHEN s.danceability >= 0.5 AND s.danceability < 0.75 THEN 'Média-alta'\n         ELSE 'Alta'\n       END AS Dançabilidade\n\nORDER BY Media DESC",
+                "origin": "user"
+              },
+              {
+                "query": "MATCH (s:Song)-[r:HAS_GENRE]-(g:Genre)\n\nRETURN g.name AS Gênero, round(100 * avg(s.danceability)) / 100 AS Media,\n       s.danceability,\n       CASE\n         WHEN s.danceability < 0.25 THEN 'Baixa'\n         WHEN s.danceability >= 0.25 AND s.danceability < 0.5 THEN 'Média-baixa'\n         WHEN s.danceability >= 0.5 AND s.danceability < 0.75 THEN 'Média-alta'\n         ELSE 'Alta'\n       END AS Dançabilidade\n\nORDER BY Media DESC",
+                "origin": "user"
+              },
+              {
+                "query": "MATCH (s:Song)-[r:HAS_GENRE]-(g:Genre)\nRETURN\n  g.name AS Genre,\n  round(100 * avg(s.danceability)) / 100 AS Media\nORDER BY Media DESC",
+                "origin": "user"
+              },
+              {
+                "query": "MATCH (s:Song)-[r:HAS_GENRE]-(g:Genre)\nRETURN\n  g.name AS Genre,\n  round(100 * avg(s.danceability)) / 100 AS Média\nORDER BY AverageDanceability DESC",
+                "origin": "user"
+              },
+              {
+                "query": "MATCH (s:Song)-[r:HAS_GENRE]-(g:Genre) RETURN g.name AS Genre, round(100 * avg(s.danceability)) / 100 AS AverageDanceability ORDER BY AverageDanceability DESC",
+                "origin": "user"
+              }
+            ]
+          },
+          "settings": {
+            "type": "table",
+            "query": "MATCH (s:Song)-[r:HAS_GENRE]-(g:Genre)\n\nRETURN g.name AS Gênero, round(100 * avg(s.danceability)) / 100 AS Media,\n       CASE\n         WHEN s.danceability < 0.25 THEN 'Baixa'\n         WHEN s.danceability >= 0.25 AND s.danceability < 0.5 THEN 'Média-baixa'\n         WHEN s.danceability >= 0.5 AND s.danceability < 0.75 THEN 'Média-alta'\n         ELSE 'Alta'\n       END AS Dançabilidade\n\nORDER BY Media DESC",
+            "databaseName": "neo4j",
+            "version": 1,
+            "richRenderCells": false,
+            "enableRecordsDownload": true
+          }
+        },
+        {
+          "version": 1,
+          "title": "Distribuição de Músicas por Gênero",
+          "w": 4,
+          "h": 4,
+          "x": 8,
+          "y": 0,
+          "meta": {
+            "latestCypherQueries": [
+              {
+                "query": "MATCH (s:Song)-[r:HAS_GENRE]-(g:Genre) RETURN g.name AS Genre, count(s) AS SongCount ORDER BY SongCount DESC LIMIT 10",
+                "origin": "user"
+              }
+            ]
+          },
+          "settings": {
+            "type": "pie",
+            "query": "MATCH (s:Song)-[r:HAS_GENRE]-(g:Genre)\nRETURN g.name AS Genre, count(s) AS SongCount\nORDER BY SongCount DESC\nLIMIT 10",
+            "databaseName": "neo4j",
+            "version": 1,
+            "valueKey": "SongCount",
+            "showLegend": "auto",
+            "enableDownloadImage": true
+          }
+        },
+        {
+          "version": 1,
+          "title": "Os 10 Artistas com o maior número de músicas",
+          "w": 5,
+          "h": 4,
+          "x": 0,
+          "y": 0,
+          "meta": {
+            "latestCypherQueries": [
+              {
+                "query": "MATCH (ar:Artist)-[r:BY_ARTIST]-(s:Song)\nRETURN ar.name AS Artist, count(s) AS NumberOfSongs\nORDER BY NumberOfSongs DESC\nLIMIT 10",
+                "origin": "user"
+              }
+            ]
+          },
+          "settings": {
+            "type": "bar",
+            "query": "MATCH (ar:Artist)-[r:BY_ARTIST]-(s:Song)\nRETURN ar.name AS Artist, count(s) AS NumberOfSongs\nORDER BY NumberOfSongs DESC\nLIMIT 10",
+            "databaseName": "neo4j",
+            "valueKeys": [],
+            "orientation": "vertical",
+            "scaleType": "linear",
+            "showLegend": "auto",
+            "showDataZoom": "auto",
+            "version": 1,
+            "barArrangement": "grouped",
+            "enableDownloadImage": true
+          }
+        },
+        {
+          "version": 1,
+          "title": "Top 5 pessoas que mais curtiram música",
+          "w": 3,
+          "h": 4,
+          "x": 5,
+          "y": 4,
+          "meta": {
+            "latestCypherQueries": [
+              {
+                "query": "MATCH (p:Person)-[:LIKED]->(s:Song)\nRETURN p.name AS Pessoa, COUNT(s) AS TotalCurtidas\nORDER BY TotalCurtidas DESC\nLIMIT 5",
+                "origin": "user"
+              },
+              {
+                "query": "MATCH (p:Person)-[:LIKED]->(s:Song)\nRETURN p.name AS Pessoa, COUNT(s) AS TotalCurtidas\nORDER BY TotalCurtidas DESC",
+                "origin": "user"
+              },
+              {
+                "query": "MATCH (ar:Artist)-[r:BY_ARTIST]-(s:Song)\nRETURN ar.name AS Artist, count(s) AS NumberOfSongs\nORDER BY NumberOfSongs DESC\nLIMIT 10",
+                "origin": "user"
+              }
+            ]
+          },
+          "settings": {
+            "type": "bar",
+            "query": "MATCH (p:Person)-[:LIKED]->(s:Song)\nRETURN p.name AS Pessoa, COUNT(s) AS TotalCurtidas\nORDER BY TotalCurtidas DESC\nLIMIT 5",
+            "databaseName": "neo4j",
+            "valueKeys": [],
+            "orientation": "vertical",
+            "scaleType": "linear",
+            "showLegend": "auto",
+            "showDataZoom": "auto",
+            "version": 1,
+            "barArrangement": "grouped",
+            "enableDownloadImage": true
+          }
+        },
+        {
+          "version": 1,
+          "title": "Número Total de Músicas no catálogo",
+          "w": 3,
+          "h": 4,
+          "x": 5,
+          "y": 0,
+          "meta": {},
+          "settings": {
+            "type": "singleValue",
+            "query": "MATCH (s:Song) RETURN count(s) AS TotalSongs",
+            "databaseName": "neo4j",
+            "version": 1,
+            "fontSize": null,
+            "textColor": "#d97110",
+            "align": 4
+          }
+        },
+        {
+          "version": 1,
+          "title": "Top 10 Músicas com mais Likes",
+          "w": 5,
+          "h": 4,
+          "x": 0,
+          "y": 4,
+          "meta": {
+            "latestCypherQueries": [
+              {
+                "query": "MATCH (s:Song)-[l:LIKED]-(:Person)\nWITH s, count(l) AS likes\nRETURN s.name AS Song, likes AS Likes\nORDER BY Likes DESC\nLIMIT 10",
+                "origin": "user"
+              },
+              {
+                "query": "MATCH (s:Song)-[l:LIKED]-(:Person)\nWITH s, count(l) AS likes\nRETURN s.name AS Song, likes AS Likes\nORDER BY Likes ASC\nLIMIT 10",
+                "origin": "user"
+              }
+            ]
+          },
+          "settings": {
+            "type": "table",
+            "query": "MATCH (s:Song)-[l:LIKED]-(:Person)\nWITH s, count(l) AS likes\nRETURN s.name AS Song, likes AS Likes\nORDER BY Likes DESC\nLIMIT 10",
+            "databaseName": "neo4j",
+            "version": 1,
+            "richRenderCells": false,
+            "enableRecordsDownload": true
+          }
+        }
+      ]
+    },
+    {
+      "version": 1,
+      "title": "🧮  Tabelas de Recomendações Feitas para Um Usuário",
+      "widgets": [
+        {
+          "version": 1,
+          "title": "Músicas curtidas por usuários semelhantes",
+          "w": 4,
+          "h": 4,
+          "x": 4,
+          "y": 0,
+          "meta": {
+            "latestCypherQueries": [
+              {
+                "query": "// Músicas curtidas por usuários semelhantes\n// Seleciona a pessoa-alvo e as músicas compartilhadas\nMATCH (p:Person {name: $usuario})-[:LIKED]->(shared:Song)\n\n// Seleciona os usuarios que gostam das mesmas musicas(shared)\nMATCH (influencer:Person)-[:LIKED]->(shared)\nWHERE influencer <> p\nWITH p, shared, influencer\n\n// Encontrar as músicas que esses outros usuários gostam, mas que a pessoa-alvo ainda não tenha curtido, e vai ser recomendado para o pessoa-alvo.\nMATCH (influencer)-[:LIKED]->(recommended:Song)\nWHERE NOT EXISTS { (p)-[:LIKED]->(recommended) }\nORDER BY rand()\nLIMIT 10\n\nRETURN\n  influencer.name AS Influencer,\n  collect(shared.name) AS MusicasEmComum,\n  collect(recommended.name) AS MusicasRecomendadas",
+                "origin": "user"
+              },
+              {
+                "query": "// Músicas curtidas por usuários semelhantes\n// Seleciona a pessoa-alvo e as músicas compartilhadas\nMATCH (p:Person {name: $usuario})-[:LIKED]->(shared:Song)\n\n// Seleciona os usuarios que gostam das mesmas musicas(shared)\nMATCH (influencer:Person)-[:LIKED]->(shared)\nWHERE influencer <> p\nWITH p, shared, influencer\n\n// Encontrar as músicas que esses outros usuários gostam, mas que a pessoa-alvo ainda não tenha curtido, e vai ser recomendado para o pessoa-alvo.\nMATCH (influencer)-[:LIKED]->(recommended:Song)\nWHERE NOT EXISTS { (p)-[:LIKED]->(recommended) }\nORDER BY rand()\nLIMIT 5\n\nRETURN\n  influencer.name AS Influencer,\n  collect(shared.name) AS MusicasEmComum,\n  collect(recommended.name) AS MusicasRecomendadas",
+                "origin": "user"
+              },
+              {
+                "query": "// Músicas curtidas por usuários semelhantes\n// Seleciona a pessoa-alvo e as músicas compartilhadas\nWITH algo\nMATCH (p:Person {name: $usuario})-[:LIKED]->(shared:Song)\n\n// Seleciona os usuarios que gostam das mesmas musicas(shared)\nMATCH (influencer:Person)-[:LIKED]->(shared)\nWHERE influencer <> p\nWITH p, shared, influencer\n\n// Encontrar as músicas que esses outros usuários gostam, mas que a pessoa-alvo ainda não tenha curtido, e vai ser recomendado para o pessoa-alvo.\nMATCH (influencer)-[:LIKED]->(recommended:Song)\nWHERE NOT EXISTS { (p)-[:LIKED]->(recommended) }\nORDER BY rand()\nLIMIT 5\n\nRETURN\n  influencer.name AS Influencer,\n  collect(shared.name) AS MusicasEmComum,\n  collect(recommended.name) AS MusicasRecomendadas",
+                "origin": "user"
+              },
+              {
+                "query": "// Músicas curtidas por usuários semelhantes\n// Seleciona a pessoa-alvo e as músicas compartilhadas\nWITH algo\nMATCH (p:Person {name: $usuario})-[:LIKED]->(shared:Song)\n\n// Seleciona os usuarios que gostam das mesmas musicas(shared)\nMATCH (influencer:Person)-[:LIKED]->(shared)\nWHERE influencer <> p\nWITH p, shared, influencer, algo\n\n// Encontrar as músicas que esses outros usuários gostam, mas que a pessoa-alvo ainda não tenha curtido, e vai ser recomendado para o pessoa-alvo.\nMATCH (influencer)-[:LIKED]->(recommended:Song)\nWHERE NOT EXISTS { (p)-[:LIKED]->(recommended) }\nORDER BY rand()\nLIMIT 5\n\nRETURN\n  influencer.name AS Influencer,\n  collect(shared.name) AS MusicasEmComum,\n  collect(recommended.name) AS MusicasRecomendadas",
+                "origin": "user"
+              }
+            ]
+          },
+          "settings": {
+            "type": "table",
+            "query": "// Músicas curtidas por usuários semelhantes\n// Seleciona a pessoa-alvo e as músicas compartilhadas\nMATCH (p:Person {name: $usuario})-[:LIKED]->(shared:Song)\n\n// Seleciona os usuarios que gostam das mesmas musicas(shared)\nMATCH (influencer:Person)-[:LIKED]->(shared)\nWHERE influencer <> p\nWITH p, shared, influencer\n\n// Encontrar as músicas que esses outros usuários gostam, mas que a pessoa-alvo ainda não tenha curtido, e vai ser recomendado para o pessoa-alvo.\nMATCH (influencer)-[:LIKED]->(recommended:Song)\nWHERE NOT EXISTS { (p)-[:LIKED]->(recommended) }\nORDER BY rand()\nLIMIT 10\n\nRETURN\n  influencer.name AS Influencer,\n  collect(shared.name) AS MusicasEmComum,\n  collect(recommended.name) AS MusicasRecomendadas",
+            "databaseName": "neo4j",
+            "version": 1,
+            "richRenderCells": false,
+            "enableRecordsDownload": true
+          }
+        },
+        {
+          "version": 1,
+          "title": "Músicas com perfil sonoro semelhante (dançabilidade, energia)",
+          "w": 4,
+          "h": 4,
+          "x": 8,
+          "y": 4,
+          "meta": {
+            "latestCypherQueries": [
+              {
+                "query": "// Músicas com perfil sonoro semelhante (dançabilidade, energia)\n\n// Compara atributos como dançabilidade e energia para sugerir músicas com perfil parecido\n// Avalia dançabilidade e energia, e ainda pode incluir outras medidas e pesos\n// É a que mais se aproxima do gosto real da Pessoa.\n// Permite encontrar músicas que combinam com o estilo da pessoa\n// É como dizer: “Essa música está bem pertinho do seu gosto no mapa musical!”\n\n\n// Etapa 1: calcular perfil médio do usuário\nMATCH (p:Person {name: $usuario})-[:LIKED]->(s:Song)\nWITH p, avg(s.danceability) AS avgDance, avg(s.energy) AS avgEnergy\n\n\n// Etapa 2: selecionar músicas não curtidas nem recomendadas\nMATCH (recommended:Song)\nWHERE\n  NOT (p)-[:LIKED]->(recommended) AND\n  NOT EXISTS {\n    MATCH (recommended)-[:SUGGESTS]-(rec:Rec)-[:TARGETED_TO]->(p)\n  }\n\n\n// Etapa 3: calcular distância euclidiana\nWITH\n  p,\n  avgDance,\n  avgEnergy,\n  avg(recommended.danceability) AS recAvgDance,\n  avg(recommended.energy) AS recAvgEnergy,\n  recommended,\n  sqrt((recommended.danceability - avgDance)^2 + (recommended.energy - avgEnergy)^2) AS distancia\n\nMATCH (recommended)-[:BY_ARTIST ]-(a:Artist), (recommended)-[:HAS_GENRE]-(g:Genre)\n\n// Etapa 4: Ordenar, sortear e limitar depois de calcular a distância, para diminuir a possibilidade de se recomendar muitas músicas de Baixa ou MuitoBaixa compatibilidade\nWITH p, recommended, distancia, avgDance, avgEnergy, recAvgDance, recAvgEnergy, a.name AS Artista, g.name AS Genero\nORDER BY rand()\nLIMIT 5\n\n\n// Etapa 5: Classificar os resultados dos níveis de compatibilidade de acordo com a Distância Euclidiana calculada no passo 3\nWITH distancia, recommended, Artista, Genero,\nCASE\n    WHEN distancia <= 0.10 THEN 'MuitoAlta'\n    WHEN distancia <= 0.25 THEN 'Alta'\n    WHEN distancia <= 0.40 THEN 'Media'\n    WHEN distancia <= 0.60 THEN 'Baixa'\n    ELSE 'MuitoBaixa'\n  END AS compatPerfil\n\n\n// Etapa 6: Retornar os resultados\nRETURN\nrecommended.name AS MusicaRecomendada,\ntoFloat(apoc.number.format(distancia, \"#0.00\"))  As Distância,\ncompatPerfil as Compatibilidade,\nArtista,\nGenero,\nrecommended.spotifyPreviewUrl AS URL",
+                "origin": "user"
+              }
+            ]
+          },
+          "settings": {
+            "type": "table",
+            "query": "// Músicas com perfil sonoro semelhante (dançabilidade, energia)\n\n// Compara atributos como dançabilidade e energia para sugerir músicas com perfil parecido\n// Avalia dançabilidade e energia, e ainda pode incluir outras medidas e pesos\n// É a que mais se aproxima do gosto real da Pessoa.\n// Permite encontrar músicas que combinam com o estilo da pessoa\n// É como dizer: “Essa música está bem pertinho do seu gosto no mapa musical!”\n\n\n// Etapa 1: calcular perfil médio do usuário\nMATCH (p:Person {name: $usuario})-[:LIKED]->(s:Song)\nWITH p, avg(s.danceability) AS avgDance, avg(s.energy) AS avgEnergy\n\n\n// Etapa 2: selecionar músicas não curtidas nem recomendadas\nMATCH (recommended:Song)\nWHERE\n  NOT (p)-[:LIKED]->(recommended) AND\n  NOT EXISTS {\n    MATCH (recommended)-[:SUGGESTS]-(rec:Rec)-[:TARGETED_TO]->(p)\n  }\n\n\n// Etapa 3: calcular distância euclidiana\nWITH\n  p,\n  avgDance,\n  avgEnergy,\n  avg(recommended.danceability) AS recAvgDance,\n  avg(recommended.energy) AS recAvgEnergy,\n  recommended,\n  sqrt((recommended.danceability - avgDance)^2 + (recommended.energy - avgEnergy)^2) AS distancia\n\nMATCH (recommended)-[:BY_ARTIST ]-(a:Artist), (recommended)-[:HAS_GENRE]-(g:Genre)\n\n// Etapa 4: Ordenar, sortear e limitar depois de calcular a distância, para diminuir a possibilidade de se recomendar muitas músicas de Baixa ou MuitoBaixa compatibilidade\nWITH p, recommended, distancia, avgDance, avgEnergy, recAvgDance, recAvgEnergy, a.name AS Artista, g.name AS Genero\nORDER BY rand()\nLIMIT 10\n\n\n// Etapa 5: Classificar os resultados dos níveis de compatibilidade de acordo com a Distância Euclidiana calculada no passo 3\nWITH distancia, recommended, Artista, Genero,\nCASE\n    WHEN distancia <= 0.10 THEN 'MuitoAlta'\n    WHEN distancia <= 0.25 THEN 'Alta'\n    WHEN distancia <= 0.40 THEN 'Media'\n    WHEN distancia <= 0.60 THEN 'Baixa'\n    ELSE 'MuitoBaixa'\n  END AS compatPerfil\n\n\n// Etapa 6: Retornar os resultados\nRETURN \nrecommended.name AS MusicaRecomendada, \ntoFloat(apoc.number.format(distancia, \"#0.00\"))  As Distância, \ncompatPerfil as Compatibilidade,\nArtista,\nGenero,\nrecommended.spotifyPreviewUrl AS URL\n\n\n",
+            "databaseName": "neo4j",
+            "version": 1,
+            "richRenderCells": false,
+            "enableRecordsDownload": true
+          }
+        },
+        {
+          "version": 1,
+          "title": "Músicas de artistas seguidos que ainda não foram curtidas",
+          "w": 4,
+          "h": 4,
+          "x": 8,
+          "y": 0,
+          "meta": {
+            "latestCypherQueries": [
+              {
+                "query": "// Músicas de artistas seguidos que ainda não foram curtidas\n\n// Seleciona a pessoa alvo da recomendação e os artistas que ela segue\nMATCH (p:Person {name: $usuario})-[:LIKES_ARTIST]->(a:Artist)\n\n// Busca músicas criadas por esses artistas\nMATCH (a)<-[:BY_ARTIST]-(s:Song)\n\n// Filtra apenas as músicas que Olivia ainda não curtiu\nWHERE NOT (p)-[:LIKED]->(s)\n\n// Limita a 5 músicas aleatórias para recomendação\nWITH p, a, s\nORDER BY rand()\nLIMIT 5\n\nRETURN a.name AS Artista, s.name AS MusicaNaoCurtida",
+                "origin": "user"
+              }
+            ]
+          },
+          "settings": {
+            "type": "table",
+            "query": "// Músicas de artistas seguidos que ainda não foram curtidas\n\n// Seleciona a pessoa alvo da recomendação e os artistas que ela segue\nMATCH (p:Person {name: $usuario})-[:LIKES_ARTIST]->(a:Artist)\n\n// Busca músicas criadas por esses artistas\nMATCH (a)<-[:BY_ARTIST]-(s:Song)\n\n// Filtra apenas as músicas que Olivia ainda não curtiu\nWHERE NOT (p)-[:LIKED]->(s)\n\n// Limita a 5 músicas aleatórias para recomendação\nWITH p, a, s\nORDER BY rand()\nLIMIT 10\n\nRETURN a.name AS Artista, s.name AS MusicaNaoCurtida",
+            "databaseName": "neo4j",
+            "version": 1,
+            "richRenderCells": false,
+            "enableRecordsDownload": true
+          }
+        },
+        {
+          "version": 1,
+          "title": "Recomendações que foram criadas para o Usuário:",
+          "w": 4,
+          "h": 7,
+          "x": 0,
+          "y": 1,
+          "meta": {
+            "latestCypherQueries": [
+              {
+                "query": "// Recomendação por gosto musical semelhante\n// Músicas Curtidas por usuários com gostos semelhantes\n// Com base em outros usuarios que curtiram a mesma música que o usuario Olivia Martinez, recomenda musicas que esses usuarios gostaram e que a Olivia Martinez ainda não curtiu\n\nMATCH (p:Person {name: \"Olivia Martinez\"})-[:LIKED]->(s:Song)<-[:LIKED]-(outro:Person)-[:LIKED]->(recomendada:Song)\nWHERE NOT (p)-[:LIKED]->(recomendada)\nRETURN DISTINCT recomendada.name AS Titulo, recomendada.genre AS Genero, recomendada.spotifyPreviewUrl AS URL, COUNT(*) AS relevancia\nORDER BY relevancia DESC\nLIMIT 10",
+                "origin": "user"
+              },
+              {
+                "query": "CALL db.schema.visualization()",
+                "origin": "user"
+              }
+            ]
+          },
+          "settings": {
+            "version": 1,
+            "type": "text",
+            "markdown": "# 🧮Tabelas de Recomendações \n\n&nbsp;&nbsp;&nbsp;\n\n🎵  Você pode escolher o usuário-alvo mudando o nome do mesmo no filtro \"**Usuários**\" acima ⬆️\n&nbsp;&nbsp;&nbsp;\n&nbsp;&nbsp;&nbsp;\n&nbsp;&nbsp;&nbsp;\n\n---\n\n###### 👩‍💻 Exemplo de Código de Recomendação por gosto musical semelhante:\n\n```\n// Recomendação por gosto musical semelhante\n// Músicas Curtidas por outros usuários com gostos semelhantes\n\nMATCH (p:Person {name: \"Olivia Martinez\"})-[:LIKED]->(s:Song)<-[:LIKED]-(outro:Person)-[:LIKED]->(recomendada:Song)\nWHERE NOT (p)-[:LIKED]->(recomendada)\nRETURN DISTINCT recomendada.name AS Titulo, recomendada.genre AS Genero, recomendada.spotifyPreviewUrl AS URL, COUNT(*) AS relevancia\nORDER BY relevancia DESC\nLIMIT 10\n```\n\n\n---\n\n\n👩‍💻**Recomendações do Sistema:**\n\n1. Músicas Curtidas  por Usuários Semelhantes\n2. Músicas de artistas seguidos que ainda não foram curtidas\n3. Músicas do mesmo gênero que o usuário costuma curtir\n4. Músicas com perfil sonoro semelhante (dançabilidade, energia)\n\n\n\n\n\n\n\n"
+          }
+        },
+        {
+          "version": 1,
+          "title": "Músicas do mesmo gênero que o usuário costuma curtir",
+          "w": 4,
+          "h": 4,
+          "x": 4,
+          "y": 4,
+          "meta": {
+            "latestCypherQueries": [
+              {
+                "query": "// Músicas do mesmo gênero que o usuário costuma curtir\n\n// Identifica gêneros(g) que Olivia costuma curtir\nMATCH (p:Person {name: $usuario})-[:LIKED]->(:Song)-[:HAS_GENRE]->(g:Genre)\nORDER BY rand()\n\n// Embaralha os gêneros para que nao fixe no primeiro gênero encontrado\nWITH DISTINCT p, g\n\n// Busca músicas do mesmo gênero que ainda não foram curtidas nem recomendadas\nMATCH (recommended:Song)-[:HAS_GENRE]->(g)\nWHERE NOT (p)-[:LIKED]->(recommended) AND NOT (p)-[:TARGETED_TO]->(recommended)\nORDER BY rand()\n\nRETURN\n  g.name AS GeneroCurtido,\n  recommended.name AS MusicasMesmoGeneroNaoCurtidas\nLIMIT 10",
+                "origin": "user"
+              },
+              {
+                "query": "// Músicas do mesmo gênero que o usuário costuma curtir\n\n// Identifica gêneros(g) que Olivia costuma curtir\nMATCH (p:Person {name: $usuario})-[:LIKED]->(:Song)-[:HAS_GENRE]->(g:Genre)\nORDER BY rand()\n\n// Embaralha os gêneros para que nao fixe no primeiro gênero encontrado\nWITH DISTINCT p, g\n\n// Busca músicas do mesmo gênero que ainda não foram curtidas nem recomendadas\nMATCH (recommended:Song)-[:HAS_GENRE]->(g)\nWHERE NOT (p)-[:LIKED]->(recommended) AND NOT (p)-[:TARGETED_TO]->(recommended)\nORDER BY rand()\n\nRETURN\n  g.name AS GeneroCurtido,\n  recommended.name AS MusicasMesmoGeneroNaoCurtidas\nLIMIT 5",
+                "origin": "user"
+              }
+            ]
+          },
+          "settings": {
+            "type": "table",
+            "query": "// Músicas do mesmo gênero que o usuário costuma curtir\n\n// Identifica gêneros(g) que Olivia costuma curtir\nMATCH (p:Person {name: $usuario})-[:LIKED]->(:Song)-[:HAS_GENRE]->(g:Genre)\nORDER BY rand()\n\n// Embaralha os gêneros para que nao fixe no primeiro gênero encontrado\nWITH DISTINCT p, g\n\n// Busca músicas do mesmo gênero que ainda não foram curtidas nem recomendadas\nMATCH (recommended:Song)-[:HAS_GENRE]->(g)\nWHERE NOT (p)-[:LIKED]->(recommended) AND NOT (p)-[:TARGETED_TO]->(recommended)\nORDER BY rand()\n\nRETURN\n  g.name AS GeneroCurtido,\n  recommended.name AS MusicasMesmoGeneroNaoCurtidas\nLIMIT 10",
+            "databaseName": "neo4j",
+            "version": 1,
+            "richRenderCells": false,
+            "enableRecordsDownload": true
+          }
+        },
+        {
+          "version": 1,
+          "title": "Usuários",
+          "w": 4,
+          "h": 1,
+          "x": 0,
+          "y": 0,
+          "meta": {},
+          "settings": {
+            "version": 1,
+            "type": "filter",
+            "databaseName": "neo4j",
+            "entityType": "node",
+            "entityLabel": "Person",
+            "entityPropertyKey": "name",
+            "parameterName": "usuario",
+            "enableTimeZone": false
+          }
+        }
+      ]
+    }
+  ],
+  "params": [
+    {
+      "version": 1,
+      "key": "genre_name"
+    },
+    {
+      "version": 1,
+      "key": "usuario",
+      "type": "string",
+      "initialValue": "Olivia Martinez"
+    },
+    {
+      "version": 1,
+      "key": "artist_name"
+    }
+  ]
+}

@@ -1,0 +1,528 @@
+name,description,query,id,parentId,isFolder
+INSTALAÇÃO,,,0,1,true
+1 - CREATE SCHEMA,,"// Criação dos Nós
+MERGE (p:Person {personId: 0})
+SET p.name = ""Exemplo Pessoa""
+MERGE (s:Song {name: ""Música Exemplo""})
+MERGE (a:Artist {name: ""Artista Exemplo""})
+MERGE (g:Genre {name: ""Gênero Exemplo""})
+
+// Criação dos Relacionamentos
+MERGE (p)-[:LIKED]->(s)
+MERGE (p)-[:LIKES_ARTIST]->(a)
+MERGE (s)-[:BY_ARTIST]->(a)
+MERGE (a)-[:HAS_STYLE]->(g)
+MERGE (s)-[:HAS_GENRE]->(g)",2,0,false
+2 -  CONSTRAINTS,,"CREATE CONSTRAINT artist_name IF NOT EXISTS FOR (a:Artist) REQUIRE a.name IS UNIQUE;
+CREATE CONSTRAINT song_name IF NOT EXISTS FOR (s:Song) REQUIRE s.name IS UNIQUE;
+CREATE CONSTRAINT genre_name IF NOT EXISTS FOR (g:Genre) REQUIRE g.name IS UNIQUE;
+CREATE CONSTRAINT person_name IF NOT EXISTS FOR (p:Person) REQUIRE p.name IS UNIQUE;",3,0,false
+3 - LOAD PERSONS,,"// 1. Executa a importação dos usuários (Person)
+CALL apoc.periodic.iterate(
+  '
+  LOAD CSV WITH HEADERS FROM ""https://drive.google.com/uc?export=download&id=1QRPPNE7gOsRfqB_WAChyllL6L_7zD-HO"" AS row
+  RETURN row
+  ',
+  '
+  MERGE (p:Person {personId: toInteger(row.personId)})
+    ON CREATE SET
+        p.name = row.name,
+        p.email = row.email,
+        p.age = toInteger(row.age),
+        p.gender = row.gender,
+        p.country = row.country,
+        p.city = row.city,
+        p.language = row.language,
+        p.subscriber = toBoolean(row.subscriber),
+        p.signupDate = date(row.signup_date),
+        p.listeningTime = row.listening_time,
+        p.device = row.device;
+  ',
+  {batchSize: 1000, parallel: false}
+);",4,0,false
+4 - LOAD SONGS,,"// Executa a importação das músicas
+CALL
+  apoc.periodic.iterate(
+    '
+  LOAD CSV WITH HEADERS FROM ""https://drive.google.com/uc?export=download&id=1kjCHTIVo8gmeqthARwG0c8fI-CqkmErM"" AS row
+  RETURN row
+  LIMIT 5000
+
+  ',
+    '
+  MERGE (s:Song {songId: row.track_id})
+  SET s.name = row.name,
+      s.spotifyPreviewUrl = row.spotify_preview_url,
+      s.spotifyId = row.spotify_id,
+      s.year = toInteger(row.year),
+      s.durationMs = toInteger(row.duration_ms),
+      s.danceability = toFloat(row.danceability),
+      s.energy = toFloat(row.energy),
+      s.key = toInteger(row.key),
+      s.loudness = toFloat(row.loudness),
+      s.mode = toInteger(row.mode),
+      s.speechiness = toFloat(row.speechiness),
+      s.acousticness = toFloat(row.acousticness),
+      s.instrumentalness = toFloat(row.instrumentalness),
+      s.liveness = toFloat(row.liveness),
+      s.valence = toFloat(row.valence),
+      s.tempo = toFloat(row.tempo),
+      s.timeSignature = toInteger(row.time_signature)
+
+  MERGE (a:Artist {name: row.artist})
+  MERGE (s)-[:BY_ARTIST]->(a)
+
+  WITH s, a, row
+  WHERE row.genre IS NOT NULL AND TRIM(row.genre) <> """"
+  MERGE (g:Genre {name: TRIM(row.genre)})
+  MERGE (s)-[:HAS_GENRE]->(g)
+  MERGE (a)-[:HAS_STYLE]->(g)
+  ',
+    {batchSize: 1000, parallel: false}
+  )",5,0,false
+5 - LANÇANDO OS RELACIONAMENTOS,,"// Faz os relacionamentos de pessoas com artistas e de pessoas com músicas
+
+// Etapa 1: para cada usuário
+MATCH (p:Person)
+WITH p
+
+// Etapa 2: filtra artistas com pelo menos 10 músicas
+MATCH (a:Artist)<-[:BY_ARTIST]-(s:Song)
+WITH p, a, count(s) AS totalMusicas
+WHERE totalMusicas >= 10
+WITH p, collect(DISTINCT a) AS artistasValidos
+
+// Etapa 3: sorteia entre 10 e 20 artistas
+WITH p, artistasValidos, toInteger(rand() * 11) + 10 AS qtdArtistas
+WITH p, apoc.coll.randomItems(artistasValidos, qtdArtistas) AS artistasSorteados
+UNWIND artistasSorteados AS artista
+MERGE (p)-[:LIKES_ARTIST]->(artista) // Relaciona as pessoas com os artistas
+WITH p, artistasSorteados
+
+// Etapa 4: sorteia entre 5 e 15 artistas para curtir músicas
+WITH p, artistasSorteados, toInteger(rand() * 11) + 5 AS qtdArtistasLikes
+WITH p, apoc.coll.randomItems(artistasSorteados, qtdArtistasLikes) AS artistasParaLikes
+UNWIND artistasParaLikes AS artistaLike
+
+// Etapa 5: pega entre 1 e 5 músicas do artista que ainda não foram curtidas pelo usuário
+MATCH (artistaLike)<-[:BY_ARTIST]-(s:Song)
+WHERE NOT (p)-[:LIKED]->(s)
+WITH p, artistaLike, collect(DISTINCT s) AS musicasPossiveis, toInteger(rand() * 5) + 1 AS qtdMusicas
+WITH p, apoc.coll.randomItems(musicasPossiveis, qtdMusicas) AS musicasSorteadas
+UNWIND musicasSorteadas AS musica
+MERGE (p)-[:LIKED]->(musica) // Relaciona as pessoas com as músicas",6,0,false
+6 - DELETA USUARIO DE EXEMPLO,,"// Deletar o usuario e todos os dados de exemplo depois de popular o banco
+MATCH (n) WHERE n.name CONTAINS ""Exemplo""
+DETACH DELETE n",7,0,false
+RECOMENDAÇÕES,,,8,1,true
+Músicas de artistas seguidos que ainda não foram curtidas,,"// Músicas de artistas seguidos que ainda não foram curtidas
+
+// Seleciona a pessoa alvo da recomendação e os artistas que ela segue
+MATCH (p:Person {name: ""Olivia Martinez""})-[:LIKES_ARTIST]->(a:Artist)
+
+// Busca músicas criadas por esses artistas
+MATCH (a)<-[:BY_ARTIST]-(s:Song)
+
+// Filtra apenas as músicas que Olivia ainda não curtiu
+WHERE NOT (p)-[:LIKED]->(s)
+
+// Limita a 5 músicas aleatórias para recomendação
+WITH p, a, s
+ORDER BY rand()
+LIMIT 5
+
+// Cria ou mescla o nó do algoritmo específico
+MERGE (algo:Algorithm {tipo: ""LikeArtist""})
+SET
+  algo.descricao = ""recomenda com base nos artistas que o usuário curte"",
+  algo.versao = ""1.0"",
+  algo.releaseDate = ""2025-11-08""
+
+// Cria o nó de recomendação
+CREATE
+  (rec:Rec
+    {
+      id: randomUUID(),
+      data: date(),
+      tipo: ""baseado_em_artista_seguido"",
+      influenciadoPor: a.name,
+      recomendadoPara: p.name
+    })
+
+// Relaciona o algoritmo à recomendação
+MERGE (algo)-[rb:RECOMMENDED_BY]->(rec)
+
+// Relaciona a recomendação à pessoa
+MERGE (rec)-[rt:TARGETED_TO]->(p)
+
+// Relaciona cada música à recomendação
+MERGE (rec)-[rs:SUGGESTS]->(s)
+
+// Relaciona cada música ao artista que a influenciou
+MERGE (s)-[ri:INFLUENCED_BY]->(a)
+SET a: InfluencerA
+
+// Retorna os elementos do grafo para visualização
+RETURN algo, rec, p, s, a, rb, rt, rs, ri",9,8,false
+Músicas do mesmo gênero que o usuário costuma curtir,,"// Músicas do mesmo gênero que o usuário costuma curtir
+
+// Identifica gêneros(g) que Olivia costuma curtir
+MATCH (p:Person {name: ""Olivia Martinez""})-[:LIKED]->(:Song)-[:HAS_GENRE]->(g:Genre)
+// Embaralha os gêneros para que nao fixe no primeiro gênero encontrado
+WITH DISTINCT p, g
+ORDER BY rand()
+
+// Busca músicas do mesmo gênero que ainda não foram curtidas nem recomendadas
+MATCH (recommended:Song)-[:HAS_GENRE]->(g)
+WHERE NOT (p)-[:LIKED]->(recommended) AND NOT (p)-[:TARGETED_TO]->(recommended)
+
+// Cria ou mescla o nó do algoritmo específico
+MERGE (algo:Algorithm {tipo: ""LikedGenre""})
+SET
+  algo.descricao =
+    ""recomenda com base nos gêneros das músicas que o usuário curte"",
+  algo.versao = ""1.0"",
+  algo.releaseDate = ""2025-11-08""
+
+WITH p, g, recommended, algo
+ORDER BY rand()
+LIMIT 5
+
+// Cria o nó de recomendação
+CREATE
+  (rec:Rec
+    {
+      id: randomUUID(),
+      data: date(),
+      tipo: ""baseado_em_generos_curtidos"",
+      influenciadoPor: g.name,
+      recomendadoPara: p.name
+    })
+
+// Criar os relacionamentos:
+WITH p, g, recommended, algo, rec
+
+// Relaciona o algoritmo à recomendação
+MERGE (algo)-[rb:RECOMMENDED_BY]->(rec)
+
+// Relaciona a recomendação à pessoa-alvo
+MERGE (rec)-[rt:TARGETED_TO]->(p)
+
+// Relaciona a recomendação com cada música recomendada
+MERGE (rec)-[rs:SUGGESTS]->(recommended)
+
+// Relaciona cada música recomendada ao gênero que influenciou a recomendação
+MERGE (recommended)-[ri:INFLUENCED_BY]->(g)
+SET g: InfluencerG // Rotula o gênero com a qualificação de Influencer
+
+// Retorna os nós e relacionamentos
+RETURN p, g, recommended, algo, rec, rb, rt, rs, ri",10,8,false
+Músicas curtidas por usuários semelhantes,,"// Músicas curtidas por usuários semelhantes
+
+// Seleciona a pessoa-alvo e as músicas compartilhadas
+MATCH (p:Person {name: ""Olivia Martinez""})-[:LIKED]->(shared:Song)
+
+// Seleciona os usuarios que gostam das mesmas musicas(shared)
+MATCH (influencer:Person)-[:LIKED]->(shared)
+WHERE influencer <> p
+WITH p, shared, influencer
+
+// Encontrar as músicas que esses outros usuários gostam e vai ser recomendado para Olivia Martinez
+MATCH (influencer)-[:LIKED]->(recommended:Song)
+WHERE NOT EXISTS { (p)-[:LIKED]->(recommended) }
+ORDER BY rand()
+LIMIT 5
+
+WITH
+  p,
+  shared,
+  influencer,
+  recommended
+
+// Cria ou reutiliza o nó do algoritmo
+MERGE (algo:Algorithm {tipo: ""ShareTaste""})
+SET
+  algo.descricao = ""recomenda com base nos usuarios com gostos semelhantes"",
+  algo.versao = ""1.0"",
+  algo.releaseDate = ""2025-11-08""
+
+// Cria o nó de recomendação
+CREATE
+  (rec:Rec
+    {
+      id: randomUUID(),
+      data: date(),
+      tipo: ""baseado_em_gostos_semelhantes"",
+      influenciadoPor: influencer.name,
+      recomendadoPara: p.name
+    })
+
+WITH
+  p,
+  shared,
+  influencer,
+  algo,
+  recommended,
+  rec,
+  datetime() AS agora
+
+// Cria relacionamentos
+MERGE (algo)-[r1:RECOMMENDED_BY]->(rec)
+MERGE (rec)-[r2:TARGETED_TO]->(p)
+MERGE (rec)-[r3:SUGGESTS]->(recommended)
+MERGE (recommended)-[r4:INFLUENCED_BY]->(influencer)
+SET influencer: InfluencerP
+SET influencer.influencerScore = coalesce(influencer.influencerScore, 0) + 1
+SET influencer.lastInfluence = agora
+SET
+  influencer.influenceHistory =
+    coalesce(influencer.influenceHistory, []) + [agora]
+
+// Retorna tudo
+RETURN algo, rec, p, influencer, recommended, r1, r2, r3, r4",11,8,false
+"Músicas com perfil sonoro semelhante (dançabilidade, energia)",,"// Músicas com perfil sonoro semelhante (dançabilidade, energia)
+
+// Compara atributos como dançabilidade e energia para sugerir músicas com perfil parecido
+// Avalia dançabilidade e energia, e ainda pode incluir outras medidas e pesos
+// É a que mais se aproxima do gosto real da Pessoa.
+// Permite encontrar músicas que combinam com o estilo da pessoa
+// É como dizer: “Essa música está bem pertinho do seu gosto no mapa musical!”
+
+// Etapa 1: calcular perfil médio do usuário
+MATCH (p:Person {name: ""Olivia Martinez""})-[:LIKED]->(s:Song)
+WITH p, avg(s.danceability) AS avgDance, avg(s.energy) AS avgEnergy
+
+// Etapa 2: selecionar músicas não curtidas nem recomendadas
+MATCH (recommended:Song)
+WHERE
+  NOT (p)-[:LIKED]->(recommended) AND
+  NOT EXISTS {
+    MATCH (recommended)-[:SUGGESTS]-(rec:Rec)-[:TARGETED_TO]->(p)
+  }
+
+// Etapa 3: calcular distância euclidiana
+WITH
+  p,
+  avgDance,
+  avgEnergy,
+  avg(recommended.danceability) AS recAvgDance,
+  avg(recommended.energy) AS recAvgEnergy,
+  recommended,
+  sqrt(
+    (recommended.danceability - avgDance) ^ 2 +
+    (recommended.energy - avgEnergy)
+    ^
+    2) AS distancia
+
+// Etapa 4: Ordenar, sortear e limitar depois de calcular a distância, para diminuir a possibilidade de se recomendar muitas músicas de Baixa ou MuitoBaixa compatibilidade
+WITH p, recommended, distancia, avgDance, avgEnergy, recAvgDance, recAvgEnergy
+ORDER BY rand()
+LIMIT 5
+
+// Etapa 5: Buscar o gênero e o artista de cada música recomendada para compor o grafo.
+MATCH (recommended)-[r1:HAS_GENRE]->(g:Genre)
+MATCH (recommended)-[r2:BY_ARTIST]->(a:Artist)
+
+// Etapa 6: Classificar as músicas por compatibilidade e retornar os dados
+WITH
+  p,
+  avgDance,
+  avgEnergy,
+  recAvgDance,
+  recAvgEnergy,
+  recommended,
+  distancia,
+  r1,
+  g,
+  r2,
+  a,
+  CASE
+    WHEN distancia <= 0.10 THEN 'MuitoAlta'
+    WHEN distancia <= 0.25 THEN 'Alta'
+    WHEN distancia <= 0.40 THEN 'Media'
+    WHEN distancia <= 0.60 THEN 'Baixa'
+    ELSE 'MuitoBaixa'
+  END AS compatPerfil
+//ORDER by compatPerfil
+
+// Etapa 7: Cria ou mescla o nó do algoritmo específico
+WITH
+  p,
+  recommended,
+  distancia,
+  r1,
+  g,
+  r2,
+  a,
+  compatPerfil,
+  avgDance,
+  avgEnergy,
+  recAvgDance,
+  recAvgEnergy
+MERGE (algo:Algorithm {tipo: ""SoundProfile""})
+SET
+  algo.descricao = ""recomenda com base no perfil sonoro que o usuário curte"",
+  algo.versao = ""1.0"",
+  algo.releaseDate = ""2025-11-11""
+
+
+// Etapa 8: Cria ou mescla o nó de Compatibilidade
+MERGE
+  (comp:Compatibility
+    {descricao: ""nivel de compatibilidade"", nivel: compatPerfil})
+SET
+  comp.profileDance = toFloat(apoc.number.format(avgDance, ""#.000"")),
+  comp.avgRecDance = toFloat(apoc.number.format(recAvgDance, ""#.000"")),
+  comp.profileEnergy = toFloat(apoc.number.format(avgEnergy, ""#.000"")),
+  comp.avgRecEnergy = toFloat(apoc.number.format(recAvgEnergy, ""#.000"")),
+  comp.distancia = toFloat(apoc.number.format(distancia, ""#.000""))
+
+
+// Etapa 9: Cria o nó de recomendação
+CREATE
+  (rec:Rec
+    {
+      id: randomUUID(),
+      data: date(),
+      tipo: ""baseado_em_perfil_sonoro"",
+      recomendadoPara: p.name
+    })
+
+// Etapa 10: Criar os relacionamentos:
+WITH p, recommended, r1, g, r2, a, algo, comp, rec
+
+// Relaciona o algoritmo à recomendação
+MERGE (algo)-[rb:RECOMMENDED_BY]->(rec)
+
+// Relaciona a recomendação à pessoa-alvo
+MERGE (rec)-[rt:TARGETED_TO]->(p)
+
+// Relaciona a recomendação com cada música recomendada
+MERGE (rec)-[rs:SUGGESTS]->(recommended)
+
+// Relaciona cada música recomendada à sua respectiva compatibilidade
+MERGE (recommended)-[ri:INFLUENCED_BY]->(comp)
+//SET g: InfluencerC // Rotula o gênero com a qualificação de Influencer
+
+// Etapa 11: Retorna o Grafo
+RETURN algo, rec, p, recommended, g, a, comp, r1, r2, rb, rt, rs, ri",12,8,false
+TABELAS DE RECOMENDAÇÕES,,,13,,true
+Músicas de artistas seguidos que ainda não foram curtidas,,"// Músicas de artistas seguidos que ainda não foram curtidas
+
+// Seleciona a pessoa alvo da recomendação e os artistas que ela segue
+MATCH (p:Person {name: $usuario})-[:LIKES_ARTIST]->(a:Artist)
+
+// Busca músicas criadas por esses artistas
+MATCH (a)<-[:BY_ARTIST]-(s:Song)
+
+// Filtra apenas as músicas que Olivia ainda não curtiu
+WHERE NOT (p)-[:LIKED]->(s)
+
+// Limita a 5 músicas aleatórias para recomendação
+WITH p, a, s
+ORDER BY rand()
+LIMIT 10
+
+RETURN a.name AS Artista, s.name AS MusicaNaoCurtida",14,13,false
+Músicas do mesmo gênero que o usuário costuma curtir,,"// Músicas do mesmo gênero que o usuário costuma curtir
+
+// Identifica gêneros(g) que Olivia costuma curtir
+MATCH (p:Person {name: $usuario})-[:LIKED]->(:Song)-[:HAS_GENRE]->(g:Genre)
+ORDER BY rand()
+
+// Embaralha os gêneros para que nao fixe no primeiro gênero encontrado
+WITH DISTINCT p, g
+
+// Busca músicas do mesmo gênero que ainda não foram curtidas nem recomendadas
+MATCH (recommended:Song)-[:HAS_GENRE]->(g)
+WHERE NOT (p)-[:LIKED]->(recommended) AND NOT (p)-[:TARGETED_TO]->(recommended)
+ORDER BY rand()
+
+RETURN
+  g.name AS GeneroCurtido,
+  recommended.name AS MusicasMesmoGeneroNaoCurtidas
+LIMIT 10",15,13,false
+Músicas curtidas por usuários semelhantes,,"// Músicas curtidas por usuários semelhantes
+
+// Seleciona a pessoa-alvo e as músicas compartilhadas
+
+MATCH (p:Person {name: $usuario})-[:LIKED]->(shared:Song)
+
+// Seleciona os usuarios que gostam das mesmas musicas(shared)
+MATCH (influencer:Person)-[:LIKED]->(shared)
+WHERE influencer <> p
+WITH p, shared, influencer
+
+// Encontrar as músicas que esses outros usuários gostam, mas que a pessoa-alvo ainda não tenha curtido, e vai ser recomendado para o pessoa-alvo.
+MATCH (influencer)-[:LIKED]->(recommended:Song)
+WHERE NOT EXISTS { (p)-[:LIKED]->(recommended) }
+ORDER BY rand()
+LIMIT 15
+
+RETURN
+  influencer.name AS Influencer,
+  collect(DISTINCT shared.name) AS MusicasEmComum,
+  collect(recommended.name) AS MusicasRecomendadas",16,13,false
+"Músicas com perfil sonoro semelhante (dançabilidade, energia)",,"// Músicas com perfil sonoro semelhante (dançabilidade, energia)
+
+// Compara atributos como dançabilidade e energia para sugerir músicas com perfil parecido
+// Avalia dançabilidade e energia, e ainda pode incluir outras medidas e pesos
+// É a que mais se aproxima do gosto real da Pessoa.
+// Permite encontrar músicas que combinam com o estilo da pessoa
+// É como dizer: “Essa música está bem pertinho do seu gosto no mapa musical!”
+
+
+// Etapa 1: calcular perfil médio do usuário
+MATCH (p:Person {name: $usuario})-[:LIKED]->(s:Song)
+WITH p, avg(s.danceability) AS avgDance, avg(s.energy) AS avgEnergy
+
+
+// Etapa 2: selecionar músicas não curtidas nem recomendadas
+MATCH (recommended:Song)
+WHERE
+  NOT (p)-[:LIKED]->(recommended) AND
+  NOT EXISTS {
+    MATCH (recommended)-[:SUGGESTS]-(rec:Rec)-[:TARGETED_TO]->(p)
+  }
+
+
+// Etapa 3: calcular distância euclidiana
+WITH
+  p,
+  avgDance,
+  avgEnergy,
+  avg(recommended.danceability) AS recAvgDance,
+  avg(recommended.energy) AS recAvgEnergy,
+  recommended,
+  sqrt((recommended.danceability - avgDance)^2 + (recommended.energy - avgEnergy)^2) AS distancia
+
+MATCH (recommended)-[:BY_ARTIST ]-(a:Artist), (recommended)-[:HAS_GENRE]-(g:Genre)
+
+// Etapa 4: Ordenar, sortear e limitar depois de calcular a distância, para diminuir a possibilidade de se recomendar muitas músicas de Baixa ou MuitoBaixa compatibilidade
+WITH p, recommended, distancia, avgDance, avgEnergy, recAvgDance, recAvgEnergy, a.name AS Artista, g.name AS Genero
+ORDER BY rand()
+LIMIT 5
+
+
+// Etapa 5: Classificar os resultados dos níveis de compatibilidade de acordo com a Distância Euclidiana calculada no passo 3
+WITH distancia, recommended, Artista, Genero,
+CASE
+    WHEN distancia <= 0.10 THEN 'MuitoAlta'
+    WHEN distancia <= 0.25 THEN 'Alta'
+    WHEN distancia <= 0.40 THEN 'Media'
+    WHEN distancia <= 0.60 THEN 'Baixa'
+    ELSE 'MuitoBaixa'
+  END AS compatPerfil
+
+
+// Etapa 6: Retornar os resultados
+RETURN 
+recommended.name AS MusicaRecomendada, 
+toFloat(apoc.number.format(distancia, ""#0.00""))  As Distância, 
+compatPerfil as Compatibilidade,
+Artista,
+Genero,
+recommended.spotifyPreviewUrl AS URL
+
+
+",17,13,false
