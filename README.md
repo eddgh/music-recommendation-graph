@@ -48,7 +48,7 @@ Este projeto utiliza **Neo4j** e **consultas Cypher** para recomendar músicas c
 
 ## 🎥 Demonstração
 
-Veja o projeto funcionando: [link para os vídeos](./video/Videos%20do%20projeto.url)
+Veja o projeto funcionando: [link para os vídeos](https://drive.google.com/drive/folders/1llyh6813P70lt0YzvAjxurDuKZN2PdFC?usp=sharing)
 
 ## 🛠️ Tecnologias
 
